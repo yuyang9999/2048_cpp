@@ -19,7 +19,10 @@ Utility& Utility::getInstance() {
 
 int Utility::randomInRange(int start, int end) {
     assert(start < end);
-    int range = end - start + 1;
+    if (end - start == 1) {
+        return start;
+    }
+    int range = end - start;
     int randVal = rand() % range;
 
     return randVal + start;

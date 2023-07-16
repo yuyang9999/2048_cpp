@@ -38,6 +38,8 @@ public:
 
     int getNumberAtPos(int row, int col);
 
+    void clear();
+
     void print();
     
 private:

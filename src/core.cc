@@ -15,11 +15,15 @@ Board::Board(int row, int col) : _row(row), _col(col) {
 }
 
 bool Board::gameOver() {
+    if (success()) {
+        return false;
+    }
     std::vector<std::pair<int,int>> emptyPositions;
     getEmptySlots(emptyPositions);
     if (emptyPositions.empty()) {
         return true;
     }
+
     return false;
 }
 
@@ -30,7 +34,7 @@ bool Board::generateRandomNumber(int &x, int &y, int &val) {
         return false;
     }
 
-    int idx = Utility::getInstance().randomInRange(0, emptySlots.size());
+    int idx = Utility::getInstance().randomInRange(0, (int)emptySlots.size());
     x = emptySlots[idx].first;
     y = emptySlots[idx].second;
 
@@ -39,6 +43,8 @@ bool Board::generateRandomNumber(int &x, int &y, int &val) {
     int valIdx = Utility::getInstance().randomInRange(0, 2);
     assert(valIdx != 2);
     val = randValues[valIdx];
+
+    _slots[x][y] = val;
     return true;
 }
 
@@ -138,49 +144,6 @@ void Board::up() {
     // all numbers are moving to the top
     for (int col = 0; col < _col; col++) {
         int hasNumSlotRow = -1;
-        for (int row = _row - 1; row >= 0; row--) {
-            int& curVal = _slots[row][col];
-            if (curVal == 0) {
-                continue;
-            }
-            // first element in the column
-            if (hasNumSlotRow == -1) {
-                hasNumSlotRow = _row - 1;
-                if (row == _row - 1) {
-                    // the first row has element
-                    continue;
-                }
-                _slots[_row - 1][col] = curVal;
-                curVal = 0;
-                continue;
-            }
-
-            int& preVal = _slots[hasNumSlotRow][col];
-            if (preVal == curVal) {
-                // merge
-                preVal += curVal;
-                curVal = 0;
-                continue;
-            }
-
-            // can't merge
-            assert(hasNumSlotRow >= 0);
-            if (row == hasNumSlotRow - 1) {
-                // adjacent, skip
-                hasNumSlotRow -= 1;
-                continue;
-            }
-            assert(_slots[row][hasNumSlotRow - 1] == 0);
-            _slots[row][--hasNumSlotRow] = curVal;
-            curVal = 0;
-        }
-    }
-}
-
-void Board::down() {
-    // all numbers are moving to the bottom
-    for (int col = 0; col < _col; col++) {
-        int hasNumSlotRow = -1;
         for (int row = 0; row < _row; row++) {
             int& curVal = _slots[row][col];
             if (curVal == 0) {
@@ -198,6 +161,49 @@ void Board::down() {
                 continue;
             }
 
+            int& preVal = _slots[hasNumSlotRow][col];
+            if (preVal == curVal) {
+                // merge
+                preVal += curVal;
+                curVal = 0;
+                continue;
+            }
+
+            // can't merge
+            assert(hasNumSlotRow >= 0);
+            if (row == hasNumSlotRow + 1) {
+                // adjacent, skip
+                hasNumSlotRow += 1;
+                continue;
+            }
+            assert(_slots[hasNumSlotRow - 1][col] == 0);
+            _slots[--hasNumSlotRow][col] = curVal;
+            curVal = 0;
+        }
+    }
+}
+
+void Board::down() {
+    // all numbers are moving to the bottom
+    for (int col = 0; col < _col; col++) {
+        int hasNumSlotRow = -1;
+        for (int row = _row - 1; row >= 0; row--) {
+            int& curVal = _slots[row][col];
+            if (curVal == 0) {
+                continue;
+            }
+            // first element in the column
+            if (hasNumSlotRow == -1) {
+                hasNumSlotRow = _row - 1;
+                if (row == _row - 1) {
+                    // the first row has element
+                    continue;
+                }
+                _slots[_row - 1][col] = curVal;
+                curVal = 0;
+                continue;
+            }
+
             // check if can merge
             int& preVal = _slots[hasNumSlotRow][col];
             if (preVal == curVal) {
@@ -208,14 +214,14 @@ void Board::down() {
             }
 
             // can't merge
-            assert(hasNumSlotRow < row);
-            if (row == hasNumSlotRow + 1) {
+            assert(hasNumSlotRow > row);
+            if (row == hasNumSlotRow - 1) {
                 // adjacent, skip
-                hasNumSlotRow += 1;
+                hasNumSlotRow -= 1;
                 continue;
             }
-            assert(_slots[row][hasNumSlotRow+1] == 0);
-            _slots[row][++hasNumSlotRow] = curVal;
+            assert(_slots[hasNumSlotRow-1][col] == 0);
+            _slots[--hasNumSlotRow][col] = curVal;
             curVal = 0;
         }
     }
@@ -239,10 +245,17 @@ void Board::print() {
         }
         std::cout << std::endl;
     }
+    std::cout << std::endl;
 }
 
 int Board::getNumberAtPos(int row, int col) {
-    return 0;
+    if (row < 0 || row >= _row) {
+        return -1;
+    }
+    if (col < 0 || col >= _col) {
+        return -1;
+    }
+    return _slots[row][col];
 }
 
 void Board::getEmptySlots(std::vector<std::pair<int, int>> &poses) {
@@ -261,6 +274,14 @@ void Board::getValueSlots(int value, std::vector<std::pair<int, int>> &valPoses)
             if (_slots[i][j] == value) {
                 valPoses.push_back({i,j});
             }
+        }
+    }
+}
+
+void Board::clear() {
+    for (int row = 0; row < _row; row++) {
+        for (int col = 0; col < _col; col++) {
+            _slots[row][col] = 0;
         }
     }
 }
