@@ -17,6 +17,7 @@ TEST(BoardTest, createBoard)
     Board b(3, 3);
     b.setNumberAtPos(0, 0, 4);
     b.setNumberAtPos(0, 1, 4);
+    b.print();
     b.right();
     b.print();
 }

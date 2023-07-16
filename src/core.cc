@@ -95,15 +95,19 @@ void Board::right() {
     // all numbers are moving to the right
     for (int row = 0; row < _row; row++) {
         int hasNumSlotCol = -1;
-        for (int col = _col; col >= 0; col--) {
+        for (int col = _col - 1; col >= 0; col--) {
             int& curVal = _slots[row][col];
             if (curVal == 0) {
                 continue;
             }
             // first element in the row
             if (hasNumSlotCol == -1) {
-                _slots[row][_col-1] = curVal;
                 hasNumSlotCol = _col - 1;
+                if (col == _col-1) {
+                    continue;
+                }
+                _slots[row][_col-1] = curVal;
+                curVal = 0;
                 continue;
             }
 
