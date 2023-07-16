@@ -1,12 +1,12 @@
 #pragma once
-
+#include <vector>
 
 
 namespace CORE {
 
 class Board {
 public:
-    Board(int row, int col) : _row(row), _col(col) {}
+    Board(int row, int col);
 
     /// @brief check if game is over or not
     /// @return 
@@ -16,7 +16,7 @@ public:
     /// @param x the position of x
     /// @param y the position of y
     /// @param val 
-    void generateRandomNumber(int& x, int& y, int& val);
+    bool generateRandomNumber(int& x, int& y, int& val);
 
     /// @brief check if the game success (got 2048)
     /// @return true if success, false otherwise
@@ -33,8 +33,19 @@ public:
 
     // down swipe operation
     void down();
+
+    bool setNumberAtPos(int row, int col, int val);
+
+    int getNumberAtPos(int row, int col);
+
+    void print();
     
 private:
+    void getEmptySlots(std::vector<std::pair<int, int>>& poses);
+
+    void getValueSlots(int value, std::vector<std::pair<int,int>>& valPoses);
+
+    std::vector<std::vector<int>> _slots;
     int _freeSlotNum;
 
     int _row;
